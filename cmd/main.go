@@ -1,24 +1,21 @@
 package main
 
 import (
+	"blog-app/internal/database" // Import our new package
 	"fmt"
 	"log"
 	"net/http"
-
-	"blog-app/internal/config"
-	"blog-app/internal/router"
 )
 
 func main() {
-	// Connect to DB
-	config.ConnectDB()
+	// 1. Run Database Migrations
+	database.RunMigrations()
 
-	// Register routes
-	router.RegisterRoutes()
+	// 2. Our simple health check handler
+	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintln(w, "API is healthy!")
+	})
 
-	fmt.Println("Server running at http://localhost:8080")
-	err := http.ListenAndServe(":8080", nil)
-	if err != nil {
-		log.Fatal("Server error: ", err)
-	}
+	fmt.Println("Server starting on port 8080...")
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }
